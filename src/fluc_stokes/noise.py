@@ -15,9 +15,9 @@ class _Noise(ABC):
         ctype: cp.dtype,
         k: cp.ndarray = None
     ):
+        self._dim = len(rshape)
         self._noise_mag = noise_mag
-        self._ctype = ctype
-        self._noise_normal_factor = mask_zero_mode / cp.sqrt(cp.prod(cp.array(rshape)))
+        self._noise_normal_factor = mask_zero_mode / cp.sqrt(cp.prod(cp.array(rshape)) * 2)
 
         self._raw_noise = cp.zeros((self._dim, *cshape), dtype=ctype)
         self.noise = cp.zeros((self._dim, *cshape), dtype=ctype)
@@ -25,7 +25,8 @@ class _Noise(ABC):
     def _generate_random_fields(self):
         shape = self._raw_noise.shape
         norm_fac = self._noise_normal_factor
-        self._raw_noise[:] = cp.random.normal(size=shape, dtype=self._ctype) * norm_fac
+        self._raw_noise[:] = cp.random.randn(*shape) + 1j * cp.random.randn(*shape)
+        self._raw_noise *= norm_fac
 
     @abstractmethod
     def _assemble_noise(self):
@@ -48,7 +49,6 @@ class ThermalNoise(_Noise):
     ):
         super().__init__(rshape, cshape, noise_mag, mask_zero_mode, ctype)
 
-        self._dim = len(rshape)
         self._k = k
 
     def _assemble_noise(self):

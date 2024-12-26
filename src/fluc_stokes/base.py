@@ -19,9 +19,8 @@ class FourierSpace:
     def __init__(self, N: list, domain: list[list[float]], rtype: cp.dtype):
         if len(domain) != len(N):
             raise ValueError("Length of domain must match the number of dimensions in N.")
-        if not isinstance(rtype, cp.dtype):
-            raise TypeError("rtype must be a valid CuPy data type.")
 
+        self.rtype = rtype
         self.N = N
         self.domain = domain
         self.ndim = len(N)
@@ -55,7 +54,7 @@ class FourierSpace:
         self.full_plan = cufft.get_fft_plan(u, axes=self._fft_axes)
 
     def get_grid(self, sparse: bool = True) -> list:
-        return cp.meshgrid(*self.x_gpu, indexing='ij', sparse=sparse)
+        return cp.array(cp.meshgrid(*self.x_gpu, indexing='ij', sparse=sparse), dtype=self.rtype)
 
     def r2c(self, u_hat: cp.ndarray, u: cp.ndarray):
         u_hat[:] = cufft.rfftn(u, norm='forward', axes=self._fft_axes, plan=self.forward_plan)
