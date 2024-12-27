@@ -55,7 +55,8 @@ class Solver:
         )
 
     def _init_lagrangian_particles(self):
-        self.particles = LagrangianParticles(self.params)
+        if self.params.enable_particles:
+            self.particles = LagrangianParticles(self.params)
 
     def set_linear_operator(self, L: cp.ndarray):
         self.time_integrator.update_linear_operator(L)
@@ -79,6 +80,8 @@ class Solver:
 
         write_velocity = self.params.write_velocity
         velocity_write_interval = self.params.velocity_write_interval
+
+        enable_particles = self.params.enable_particles
         write_particle = self.params.write_particle
         particle_write_interval = self.params.particle_write_interval
 
@@ -93,8 +96,9 @@ class Solver:
 
             self.timer(self.t, self.step)
 
-            self.stokes.update_full_velocity()
-            self.particles.stepping(self.stokes.u_hat_full)
+            if enable_particles:
+                self.stokes.update_full_velocity()
+                self.particles.stepping(self.stokes.u_hat_full)
 
             self.noise.update()
             self.time_integrator.integrate(u_hat, noise)
@@ -107,7 +111,9 @@ class Solver:
                 self.stokes.gpu_to_cpu()
                 self.velocity_writer.write(self.stokes.u_cpu, self.t, self.step)
 
-            write_particle_ = write_particle and self.step % particle_write_interval == 0
+            write_particle_ = (
+                enable_particles and write_particle and self.step % particle_write_interval == 0
+            )
             if write_particle_:
                 self.particles.write(self.t, self.step)
 

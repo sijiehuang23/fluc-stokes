@@ -24,15 +24,15 @@ class Stokes(FourierSpace):
         self.filter_kernel = cp.ones(self.cshape, dtype=self.params.rtype)
 
     def initialize(self, u: cp.ndarray, space: str = 'fourier'):
-        if u.shape != self.u_gpu.shape:
-            raise ValueError(
-                f"Input array shape {u.shape} does not match expected shape {self.u_gpu.shape}."
-            )
         if space.casefold() == 'fourier':
+            if u.shape != self.u_hat.shape:
+                raise ValueError("Invalid input shape.")
             self.u_hat[:] = u
             self.project()
             self.backward()
         elif space.casefold() == 'physical':
+            if u.shape != self.u_hat.shape:
+                raise ValueError("Invalid input shape.")
             self.u_gpu[:] = u
             self.forward()
             self.project()
