@@ -40,9 +40,6 @@ class Stokes(FourierSpace):
             raise ValueError("Invalid space. Use 'fourier' or 'physical'.")
         self.update_full_velocity()
 
-    def update_filter_kernel(self, G: cp.ndarray):
-        self.filter_kernel[:] = G
-
     def project(self):
         leray_projection(self.u_hat, self.k, self.k_over_k2)
 

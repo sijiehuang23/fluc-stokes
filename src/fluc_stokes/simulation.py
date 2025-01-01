@@ -64,6 +64,9 @@ class Solver:
     def set_noise_correlation(self, C: cp.ndarray):
         self.noise.set_noise_correlation(C)
 
+    def set_filter_kernel(self, G: cp.ndarray):
+        self.stokes.filter_kernel[:] = G
+
     def initialize_velocity(self, u0: cp.ndarray, space: str = 'fourier'):
         self.stokes.initialize(u0, space)
 
