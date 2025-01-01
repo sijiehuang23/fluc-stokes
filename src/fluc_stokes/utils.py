@@ -1,19 +1,8 @@
-import numpy as np
 import time
 from . import logger
 
 
-def periodic_bc(u: np.ndarray) -> np.ndarray:
-    """
-    Enforce periodic boundary conditions on the input data.
-    """
-    for axis in range(u.ndim):
-        first_slice = np.take(u, indices=0, axis=axis)
-        u = np.concatenate((u, np.expand_dims(first_slice, axis=axis)), axis=axis)
-    return u
-
-
-def format_time(seconds: float, format='dd-hh:mm:ss') -> str:
+def format_time(seconds: float, format: str = 'dd-hh:mm:ss') -> str:
     """
     Format the time into various formats: 'dd-hh:mm:ss', 'hh:mm:ss', or 'mm:ss'.
 

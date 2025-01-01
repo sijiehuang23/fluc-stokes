@@ -64,8 +64,8 @@ class Solver:
     def set_noise_correlation(self, C: cp.ndarray):
         self.noise.set_noise_correlation(C)
 
-    def initialize_velocity(self, u: cp.ndarray, space='fourier'):
-        self.stokes.initialize(u, space)
+    def initialize_velocity(self, u0: cp.ndarray, space: str = 'fourier'):
+        self.stokes.initialize(u0, space)
 
     def initialize_particles(self, xp: cp.ndarray):
         self.particles.initialize(xp)
@@ -78,6 +78,7 @@ class Solver:
         u_hat = self.stokes.u_hat
         noise = self.noise.noise
 
+        enable_filter = self.params.enable_filter
         write_velocity = self.params.write_velocity
         velocity_write_interval = self.params.velocity_write_interval
 
@@ -90,7 +91,7 @@ class Solver:
             self.stokes.gpu_to_cpu()
             self.velocity_writer.write(self.stokes.u_cpu, self.t, self.step)
 
-        while not cp.isclose(self.t, end_time, rtol=1e-8, atol=1e-10):
+        while not cp.isclose(self.t, end_time, atol=1e-10, rtol=1e-10):
             self.t += dt
             self.step += 1
 
@@ -103,7 +104,8 @@ class Solver:
             self.noise.update()
             self.time_integrator.integrate(u_hat, noise)
             self.stokes.project()
-            self.stokes.filter()
+            if enable_filter:
+                self.stokes.filter()
 
             write_velocity_ = write_velocity and self.step % velocity_write_interval == 0
             if write_velocity_:
@@ -117,4 +119,5 @@ class Solver:
             if write_particle_:
                 self.particles.write(self.t, self.step)
 
+        cp.cuda.Device().synchronize()
         self.timer.final()

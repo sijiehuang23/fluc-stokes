@@ -38,6 +38,7 @@ class Params:
             'viscosity': 1e-2,
             'noise_type': 'thermal',
             'noise_mag': 0.0,
+            'enable_filter': False,
             'enable_particles': False,
             'n_particles': 100,
             'verbose': False,
