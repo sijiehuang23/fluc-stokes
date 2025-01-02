@@ -18,7 +18,7 @@ def _wavevector(shape: list, dtype: cp.dtype):
 class FourierSpace:
     def __init__(self, N: list, domain: list[list[float]], rtype: cp.dtype):
         if len(domain) != len(N):
-            raise ValueError("Length of domain must match the number of dimensions in N.")
+            raise ValueError("Length of domain must match the number of dimensions.")
 
         self.rtype = rtype
         self.N = N
@@ -52,9 +52,6 @@ class FourierSpace:
         self.forward_plan = cufft.get_fft_plan(u, axes=self._fft_axes, value_type='R2C')
         self.backward_plan = cufft.get_fft_plan(u_hat, axes=self._fft_axes, value_type='C2R')
         self.full_plan = cufft.get_fft_plan(u, axes=self._fft_axes)
-
-    def get_grid(self, sparse: bool = True) -> list:
-        return cp.array(cp.meshgrid(*self.x_gpu, indexing='ij', sparse=sparse), dtype=self.rtype)
 
     def r2c(self, u_hat: cp.ndarray, u: cp.ndarray):
         u_hat[:] = cufft.rfftn(u, norm='forward', axes=self._fft_axes, plan=self.forward_plan)

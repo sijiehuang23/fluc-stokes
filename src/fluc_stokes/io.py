@@ -54,7 +54,7 @@ class Params:
             'velocity_restart_interval': cp.iinfo(cp.int64).max,
             'velocity_restart_mode': 'w',
             'write_particle': False,
-            'particle_file_name': 'data',
+            'particle_file_name': 'particle',
             'particle_write_interval': cp.iinfo(cp.int64).max,
             'particle_write_first_step': True,
             'particle_write_mode': 'w'
